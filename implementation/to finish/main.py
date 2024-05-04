@@ -45,7 +45,7 @@ def parse(input):
                     if input[i] in DIGIT:
                         rule = input[i]
                         stack.append(rule)
-                        print(f'Rule changed for digit: {rule}')
+                        print(f'Pushed digit (rule 29): {rule}')
                     else:
                         print('Error because of digit', input[i])
                 elif current == 'LETTER':
@@ -53,7 +53,7 @@ def parse(input):
                     if input[i] in LETTER:
                         rule = input[i]
                         stack.append(rule)
-                        print(f'Rule changed for letter: {rule}')
+                        print(f'Pushed letter (rule 25): {rule}')
                     else:
                         print('Error because of letter', input[i])
                 elif current == 'NAMECHAR':
@@ -62,7 +62,7 @@ def parse(input):
                         rule = input[i]
                         stack.append('NAMECHAR')
                         stack.append(rule)
-                        print(f'Pushed changed for namechar: {rule}')
+                        print(f'Pushed namechar (rule 18): {rule}')
                 else:
                     rule = RULES_SEPARATED[rule - 1].split(' -> ')[1].split(' ')
                     # if there are rules <?xml, version=", beside each other in rule, merge them
