@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <bookstore>
   <book>
-    <title>Rýchlokurz geniality</title>
+    <title>Rychlokurz geniality</title>
     <lang>sk</lang>
-    <author>Ľudovít Ódor</author>
+    <author>Ludovit Odor</author>
     <category>non-fiction</category>
     <year>2022</year>
     <price>26.00</price>

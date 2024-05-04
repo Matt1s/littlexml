@@ -1,17 +1,9 @@
-
 LETTER = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'š', 'č', 'ć', 'ď', 'ž', 'ľ', 'á', 'é', 'í', 'ó', 'ú', 'ý', 'ä', 'ô', 'ö', 'ü', 'ť', 'ŕ', 'ĺ', 'ň',
           'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'Š', 'Č', 'Ć', 'Ď', 'Ž', 'Ľ', 'Á', 'É', 'Í', 'Ó', 'Ú', 'Ý', 'Ä', 'Ô', 'Ö', 'Ü', 'Ť', 'Ŕ', 'Ĺ', 'Ň']
 
 DIGIT = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 ASCII = ['.','-','!', '#', '$', '%', '&', '(', ')', '*', '+', ',', '/', ';', '=', '?', '@', '[', ']', '^', '_', '{', '|', '}', '~']
-
-NONTERMINALS = ['XMLDOCUMENT', 'XMLDECL', 'VERNUMB','ELEMENT', 'ELEMENT`','ELEMENT``', 'ENDTAG',
-                'WORDS', 'ELEMENTS', 'NAME', 'NAMECHAR', 'LETTER', 'NUMBER', 'DIGIT', 'WORD', 'WORD`','CHAR']
-
-TERMINALS = ['<?xml version ="', '"?>', '.', '<', '>', '/>', '</', ' ', ':', '-'] + LETTER + DIGIT + ASCII
-
-q0 = 'XMLDOCUMENT'
 
 RULES_SECOND_REVISION = {
     'XMLDOCUMENT': (
@@ -186,165 +178,64 @@ PARSING_TABLE = {
     }
 }
 
-def get_next_state(current_state, terminal):
-    print('Getting next from from parsing table...')
-    print(f'Current state: {current_state}, Terminal: {terminal}')
-    for key in PARSING_TABLE.get(current_state):
-        if terminal in key:
-            return PARSING_TABLE.get(current_state).get(key)
-    return None
-
-def tokenize(input_string):
-    # Following the PARSING_TABLE, we can tokenize the example
-    tokens = []
+# Lexical analysis using DFA for LittleXML
+def lexical_analysis(input_string):
     START_STATE = 'XMLDOCUMENT'
-    CURRENT_STATE = START_STATE
-    RULE_USED = None
-    # Split the example by the rule used in current state
-    while input_string:
-        for terminal in TERMINALS:
-            print(terminal)
-            for key in PARSING_TABLE.get(CURRENT_STATE):
-                if terminal in key:
-                    print(f'Key: {key}, Value: {PARSING_TABLE.get(CURRENT_STATE).get(key)}')
-                    tokens.append(terminal)
-                    input_string = input_string[len(key):]
-                    RULE_USED = PARSING_TABLE.get(CURRENT_STATE).get(key)
-                    print(RULE_USED)
-                    # Going to next rule from RULES_SECOND_REVISION, based on next terminal in the input_string
-                    NEXT_TERMINAL = input_string[0]
-                    CURRENT_STATE = get_next_state(CURRENT_STATE, NEXT_TERMINAL)
-                    print(f'Current state: {CURRENT_STATE}')
-    return tokens
-
-
-DA = {
-    'XMLDOCUMENT':{
-        '<?xml version="': 'XMLDECL',
-        '<': 'ELEMENT'
-    },
-    'XMLDECL':{
-        'DIGIT': 'VERNUMB',
-    },
-    'VERNUMB':{
-        '.': 'VERNUMB`',
-    },
-    'VERNUMB`':{
-        'DIGIT': 'VERNUMB``',
-    },
-    'VERNUMB``':{
-        '"?>': 'ELEMENT'
-    },
-    'ELEMENT':{
-        '<': 'NAME'
-    },
-    'NAME':{
-        'LETTER': 'NAMECHAR'
-    },
-    'NAMECHAR':{
-        'LETTER': 'NAMECHAR',
-        'DIGIT': 'NAMECHAR',
-        'ASCII': 'NAMECHAR',
-        '>': 'ELEMENT`',
-        '/>': 'ELEMENT``',
-    },
-    'ELEMENT``':{
-        'EOF': 'FINAL',
-    },
-    'ELEMENT`':{
-        'LETTER': 'WORDS',
-        'DIGIT': 'WORDS',
-        'ASCII': 'WORDS',
-        '</': 'NAME',
-        '<': 'NAME',
-    },
-    'WORDS':{
-        'LETTER': 'CHAR',
-        'DIGIT': 'CHAR',
-        'ASCII': 'CHAR',
-        '</': 'NAME',
-    },
-    'CHAR':{
-        'LETTER': 'CHAR',
-        'DIGIT': 'CHAR',
-        'ASCII': 'CHAR',
-        '</': 'NAME',
-    }
-}
-
-
-def check_string(example):
-
-    # Tokenize the example
-    # tokens = tokenize(example)
-    # print(tokens)
-    # Parse the tokens
-    #return parse(tokens)
-    # Use the DA to check if the example is valid
-    STARTING_STATE = 'XMLDOCUMENT'
-    current_state = STARTING_STATE
-    # loop through NDA current_state and find the longest match
-    print('Looping through DA...')
+    current_state = START_STATE
+    current_token = ''
+    tokens = []
     i = 0
-    while True:
-        key = example[i]
-        current_non_terminal = None
-        if(key == ' '):
-            print('Skipping space')
-            i += 1
-            key = example[i]
-        for key in DA.get(current_state):
-            # Possible keys in the current state:
-            print("Possible non-terminals:", DA.get(current_state).keys())
-            print(f'Current key: {key}')
-            if key == 'DIGIT':
-                if example[i] in DIGIT:
-                    key = example[i]
-                    print('Found digit:', key)
-                    current_non_terminal = 'DIGIT'
-            if key == 'LETTER':
-                if example[i] in LETTER:
-                    key = example[i]
-                    print('Found letter:', key)
-                    current_non_terminal = 'LETTER'
-            if key == 'ASCII':
-                if example[i] in ASCII:
-                    key = example[i]
-                    print('Found ASCII:', key)
-                    current_non_terminal = 'ASCII'
-
-            try:
-                print(example[i], example[i+1], example[i+2])
-            except:
-                print('End of example')
-            if(example[i] == ' '):
-                # Skip until next non-space character
+    # Split input_string into group of terminals: NAME, WORDS
+    while i < len(input_string):
+        # First, checking <?xml version="
+        if input_string[i] == '<':
+            # Check if it is an element
+            if input_string[i+1] == '/':
+                tokens.append('</')
+                i += 2
+            elif input_string[i+1] == '?':
+                tokens.append('<?xml version="')
+                i += 15
+            else:
+                tokens.append('<')
                 i += 1
-                print('Skipping space')
-            if key in example[i:]:
-                print('CHANGING STATE!')
-                # Update the current state to the value of the key
-                if current_non_terminal:
-                    current_state = DA.get(current_state).get(current_non_terminal)
-                else:
-                    current_state = DA.get(current_state).get(key)
-                i += len(key)
-                print('Current i', i)
-                print(f'Found key: {key}')
-                try:
-                    print('Next symbol:', example[i])
-                except:
-                    print('End of example')
-                    
-                print(f'Next state: {current_state}')
-                # If the current state is FINAL, the example is valid
-                current_non_terminal = None
-                if current_state == 'FINAL':
-                    return True
-                break
-                
-    return True
+        elif input_string[i] == '>':
+            tokens.append('>')
+            i += 1
+        elif input_string[i] == '/':
+            tokens.append('/>')
+            i += 2
+        elif input_string[i] == '?':
+            tokens.append('<?')
+            i += 2
+        elif input_string[i] == '"':
+            tokens.append('"')
+            i += 1
+        elif input_string[i] in LETTER or input_string[i] in DIGIT or input_string[i] in ASCII or input_string[i] == ' ':
+            current_token = ''
+            while i < len(input_string) and (input_string[i] in LETTER or input_string[i] in DIGIT or input_string[i] in ASCII or input_string[i] == ' '):
+                current_token += input_string[i]
+                i += 1
+            tokens.append(current_token)
+        else:
+            i += 1
 
+    # Join elements together, is there is < followed by letter, followed by >, join them together
+    i = 0
+    while i < len(tokens):
+        if tokens[i] == '<'  and tokens[i+2] == '>':
+            tokens[i] = '<' + tokens[i+1] + '>'
+            del tokens[i+1:i+3]
+        i += 1
+    
+    # Join elements together if there is </ followed by letter, followed by >
+    i = 0
+    while i < len(tokens):
+        if tokens[i] == '</' and tokens[i+2] == '>':
+            tokens[i] = '</' + tokens[i+1] + '>'
+            del tokens[i+1:i+3]
+        i += 1
+    return tokens
 
 def main():
     # Reading the input file as utf-8, splitting the input examples by the empty line
@@ -363,13 +254,10 @@ def main():
                 example_stripped.append(line_stripped)
         example_stripped = ''.join(example_stripped)
         print(f'Example: {example_stripped}')
-        if check_string(example_stripped):
-            print('The example is valid')
-        else:
-            print('The example is invalid')
-        print('------------------------------------')
+        print(lexical_analysis(example_stripped))
 
 
 if __name__ == '__main__':
     main()
+
 
