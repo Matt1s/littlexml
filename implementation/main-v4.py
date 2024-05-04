@@ -1,12 +1,17 @@
 
 from grammar import *
-def find_longest_non_terminal(non_terminal):
+def find_longest_non_terminal(non_terminal, remaining_input):
     longest = ""
     for key in PARSING_TABLE[non_terminal]:
-        if key == 'ε':
-            continue
-        if len(key) > len(longest):
-            longest = key
+        for i in range(len(key), 0, -1):
+            if key[:i] == remaining_input[:i]:
+                if len(key[:i]) > len(longest):
+                    longest = key[:i]
+    print(f'Longest: {longest}', 'Non-terminal:', non_terminal)
+    if(longest == ''):
+        # Return epsilon if no match is found
+        print('No match found for non-terminal:', non_terminal)
+        return 'ε'
     return longest
 
 def parse(input):
@@ -17,18 +22,27 @@ def parse(input):
     stack.append(STARTING_NON_TERMINAL)
     i = 0
     while i < len(input):
-        print(f'Index: {i}')
-        print(f'Input: {input[i]}{input[i+1]}{input[i+2]}')
+        if input[i] == ' ':
+            i+=1
+            continue
+        try:
+            print(f'Input: {input[i]}{input[i+1]}{input[i+2]}{input[i+3]}{input[i+4]}{input[i+5]}')
+        except:
+            pass
         if not stack:
             return 'Error'
         print(f'Stack: {stack}')
         current = stack.pop()
         print(f'Current: {current}')
         if current in NON_TERMINALS:
-            longest_non_terminal = find_longest_non_terminal(current)
+            longest_non_terminal = find_longest_non_terminal(current, input[i:])
+            if (current == "ENDTAG" and longest_non_terminal == 'ε'):
+                stack.append('ELEMENT``')
+                current = 'ELEMENT``'
             if longest_non_terminal and longest_non_terminal in PARSING_TABLE[current]:
-                rule = PARSING_TABLE[current][longest_non_terminal]
-                print(f'Rule HERE: {rule}')
+                if(current != 'NAMECHAR'):
+                    rule = PARSING_TABLE[current][longest_non_terminal]
+                    print(f'Rule: {rule}')
                 if current == 'DIGIT':
                     # Treat the digit as a terminal because it is a single character because '29: DIGIT -> 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9',
                     if input[i] in DIGIT:
@@ -47,14 +61,16 @@ def parse(input):
                         print('Error because of letter', input[i])
                 elif current == 'NAMECHAR':
                     # Treat the namechar as a terminal because it is a single character because '26: NAMECHAR -> LETTER | DIGIT | . | - | _',
-                    if input[i] in LETTER or input[i] == '.' or input[i] == '-' or input[i] == '_':
+                    if input[i] in LETTER or input[i] == '.' or input[i] == '-' or input[i] == '_' or input[i] in DIGIT or input[i] == ' ':
                         rule = input[i]
+                        stack.append('NAMECHAR')
                         stack.append(rule)
                         print(f'Pushed rule NAMECHAR: {rule}')
                     else:
                         print('Error because of namechar', input[i])
                 else:
                     rule = RULES_SEPARATED[rule - 1].split(' -> ')[1].split(' ')
+                    print("Split rule: ", rule)
                     # if there are rules <?xml, version=", beside each other in rule, merge them
                     rule.reverse()
                     for r in rule:
@@ -64,19 +80,9 @@ def parse(input):
                             print(f'Popped version=" as it is part of the rule <?xml version="')
                         stack.append(r)
                         print(f'Pushed rule not DIGIT or LETTER: {r}')
-            elif '$' in PARSING_TABLE[current]:
-                rule = PARSING_TABLE[current]['$']
-                print(f'Rule 3: {rule}')
-                if isinstance(rule, int):
-                    rule = RULES_SEPARATED[rule - 1].split(' -> ')[1].split(' ')
-                    rule.reverse()
-                    for r in rule:
-                        stack.append(r)
-                        print(f'Pushed rule 4: {r}')
-                elif rule == 'ε':
-                    pass
-                else:
-                    stack.append(rule)
+            elif longest_non_terminal == 'ε':
+                print('Pushed ε')
+                stack.append('ε')
             else:
                 return 'Error because of non-terminal'
         elif current == input[i]:

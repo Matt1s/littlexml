@@ -19,7 +19,7 @@ RULES_SEPARATED = [
     '13: ELEMENTS -> ELEMENT',
     '14: ELEMENTS -> ε',
     '15: NAME -> LETTER NAMECHAR',
-    '16: NAME -> NAMECHAR',
+    '16: NAME ->  NAMECHAR',
     '17: NAME -> : NAMECHAR',
     '18: NAMECHAR -> LETTER NAMECHAR',
     '19: NAMECHAR -> DIGIT NAMECHAR',
@@ -421,9 +421,7 @@ PARSING_TABLE = {
         'W': 25,
         'X': 25,
         'Y': 25,
-        'Z': 25,
-        ' ': 16,
-        ':': 17
+        'Z': 25
     },
     
     'NUMBER': {

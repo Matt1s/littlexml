@@ -9,7 +9,7 @@
     <price>26.00</price>
   </book>
   <book>
-    <title>Nespútaná duša</title>
+    <title>Nesputana dusa</title>
     <lang>sk</lang>
     <author>Michael A. Singer</author>
     <category>self-development</category>
